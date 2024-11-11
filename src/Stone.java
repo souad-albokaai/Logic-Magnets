@@ -19,4 +19,4 @@ public class Stone {
     public String toString() {
         return color + " " + type;
     }
-}
+}         

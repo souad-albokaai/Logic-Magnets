@@ -1,4 +1,6 @@
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Board {
     Stone[][] grid;
@@ -8,6 +10,24 @@ public class Board {
         grid = new Stone[rows][cols];
         this.goalPositions = goalPositions;
     }
+
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Board board = (Board) obj;
+
+        return Arrays.deepEquals(this.grid, board.grid) && this.goalPositions.equals(board.goalPositions);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(Arrays.deepHashCode(grid), goalPositions);
+    }
+
+    public List<Position> getGoalPositions() {
+        return this.goalPositions;
+    }
     public void placeStone(int row, int col, Stone stone) {
         if (row >= 0 && row < grid.length && col >= 0 && col < grid[0].length) {
             grid[row][col] = stone;
@@ -15,12 +35,15 @@ public class Board {
     }
     public boolean isGoalState() {
         for (Position pos : goalPositions) {
-            if (grid[pos.getRow()][pos.getCol()] == null) {
+            Stone stone = grid[pos.getRow()][pos.getCol()];
+
+            if (stone == null || !(stone.getType().equals("Iron") || stone.getType().equals("Magnet"))) {
                 return false;
             }
         }
         return true;
     }
+
 
     public void printBoard() {
         for (int i = 0; i < grid.length; i++) {
@@ -34,6 +57,11 @@ public class Board {
             System.out.println();
         }
     }
+
+    public Stone[][] getBoardArray() {
+        return this.grid;
+    }
+
 
     public boolean moveStone(int currentRow, int currentCol, int newRow, int newCol) {
         if (isWithinBounds(newRow, newCol) && grid[newRow][newCol] == null && grid[currentRow][currentCol] != null) {
@@ -59,24 +87,27 @@ public class Board {
     public Position getCurrentRedMagnetPosition() {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
-                Stone stone = getStone(i, j);
-                if (stone != null && stone.getColor().equals("Red Magnetic")) {
+                if (grid[i][j] != null && grid[i][j].getType().equals("Magnet") && grid[i][j].getColor().equals("Red Magnetic")) {
+                    System.out.println("تم العثور على المغناطيس الأحمر في (" + i + ", " + j + ")");
                     return new Position(i, j);
                 }
             }
         }
-        return null; // exception
+        System.out.println("لم يتم العثور على المغناطيس الأحمر.");
+        return null;
     }
 
     public Position getCurrentPinkMagnetPosition() {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
-                Stone stone = getStone(i, j);
-                if (stone != null && stone.getColor().equals("Pink Magnetic")) {
+                if (grid[i][j] != null && grid[i][j].getType().equals("Magnet") && grid[i][j].getColor().equals("Pink Magnetic")) {
+                    System.out.println("تم العثور على المغناطيس الوردي في (" + i + ", " + j + ")");
                     return new Position(i, j);
                 }
             }
         }
+        System.out.println("لم يتم العثور على المغناطيس الوردي.");
         return null;
     }
+
 }

@@ -5,15 +5,10 @@ import java.util.Scanner;
 public class Game {
     private Board board;
     private GameLogic logic;
-    private int currentStage = 1;
 
-    public Game() {
-        setupStage(currentStage);
-        logic = new GameLogic(board);
-    }
 
-    public void setupStage(int stage) {
-        List<Position> goals = new ArrayList<>();
+
+    public void setupStage(int stage, List<Position> goals) {
         Stone redMagnet = new Stone("Red Magnetic", "Magnet");
         Stone pinkMagnet = new Stone("Pink Magnetic", "Magnet");
         Stone ironStone = new Stone("Iron", "Iron");
@@ -21,67 +16,68 @@ public class Game {
         switch (stage) {
             case 1:
                 board = new Board(3, 3, goals);
-                board.placeStone(0, 0, redMagnet);
-                board.placeStone(2, 2, ironStone);
-                goals.add(new Position(1, 1));
+                board.placeStone(2, 2, redMagnet);
+                System.out.println("تم وضع المغناطيس الأحمر في (2, 2)");
+                board.placeStone(1, 0, ironStone);
+                board.placeStone(0, 1, pinkMagnet);
+                goals.add(new Position(2, 0));
                 break;
-
             case 2:
                 board = new Board(3, 3, goals);
                 board.placeStone(0, 0, redMagnet);
+                System.out.println("تم وضع المغناطيس الأحمر في (0, 0)");
                 board.placeStone(0, 2, pinkMagnet);
+                System.out.println("تم وضع المغناطيس الوردي في (0, 2)");
                 board.placeStone(2, 1, ironStone);
                 goals.add(new Position(1, 1));
                 goals.add(new Position(2, 2));
                 break;
-
             default:
                 System.out.println("Stage not implemented.");
                 break;
         }
     }
 
+
     public void startGame() {
+        List<Position> primaryGoals = new ArrayList<>();
+        setupStage(1, primaryGoals);
+
+        logic = new GameLogic(board);
         Scanner scanner = new Scanner(System.in);
+
         while (!board.isGoalState()) {
             board.printBoard();
             System.out.println("ماذا تريد أن تفعل؟");
-            System.out.println("1. تحريك المغناطيس الأحمر");
-            System.out.println("2. تحريك المغناطيس الوردي");
+            System.out.println("1. البحث باستخدام BFS");
+            System.out.println("2. البحث باستخدام DFS");
             System.out.println("0. الخروج");
 
             int choice = scanner.nextInt();
             if (choice == 0) break;
 
-            System.out.print("أدخل المكان الجديد (row, col): ");
-            int newRow = scanner.nextInt();
-            int newCol = scanner.nextInt();
-
-            Board currentBoard = null;
+            Board resultBoard = null;
             switch (choice) {
                 case 1:
-                    currentBoard = logic.moveRedMagnet(currentBoard.getCurrentRedMagnetPosition().getRow(),
-                            currentBoard.getCurrentRedMagnetPosition().getCol(),
-                            newRow, newCol);
+                    resultBoard = logic.bfs();
                     break;
                 case 2:
-                    currentBoard = logic.movePinkMagnet(currentBoard.getCurrentPinkMagnetPosition().getRow(),
-                            currentBoard.getCurrentPinkMagnetPosition().getCol(),
-                            newRow, newCol);
+                    resultBoard = logic.dfs();
                     break;
                 default:
                     System.out.println("اختيار غير صحيح.");
             }
 
-
-            if (currentBoard != null) {
-                currentBoard.printBoard();
+            if (resultBoard != null && resultBoard.isGoalState()) {
+                System.out.println("تم العثور على الحل.");
+                resultBoard.printBoard();
+                break;
+            } else {
+                System.out.println("لم يتم العثور على حل.");
             }
-        }
-        if (board.isGoalState()) {
-            System.out.println("تهانينا! لقد حققت الهدف.");
         }
         scanner.close();
     }
+
 
 }
